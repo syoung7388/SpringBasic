@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.KI.example.mapper.BoardMapper">
+    
+     <select id="selectBoardList" resultType="Board">
+           SELECT           b_num       as b_num,
+                            b_title     as b_title,
+                            b_content   as b_content,
+                            b_dateTime  as b_dateTime,
+                            b_hits      as b_hits,
+                            group_id    as group_id,
+                            b_order     as b_order,
+                            b_id        as b_id,
+                            b_number    as b_number,
+                            @ROWNUM := @ROWNUM -1 AS Rownum,ta.*
+          FROM              lc_board ta,
+                            (SELECT @rownum := (SELECT COUNT(*)-#{pageNum}+1 FROM lc_board))tb
+          WHERE             b_number= #{b_number}
+          ORDER BY          group_id DESC, b_order ASC
+          LIMIT             #{pageNum},3 
+      </select>
+
+     <select id="getCount" resultType="int">
+           SELECT COUNT(*) FROM lc_board WHERE b_number=#{b_number}
+     </select>
+     
+     <select id= "selectBoard" resultType="Board">
+           SELECT         b_num       as b_num,
+                          b_title     as b_title,
+                          b_content   as b_content,
+                          b_dateTime  as b_dateTime,
+                          b_hits      as b_hits,
+                          group_id    as group_id,
+                          b_order     as b_order,
+                          b_id        as b_id,
+                          b_number    as b_number
+           FROM           lc_board   
+           WHERE          b_num= #{b_num}
+
+     </select>
+     
+     <update id="Hits" parameterType="Board">
+          update lc_board set b_hits=b_hits+1 where b_num=#{b_num}
+     </update>
+      
+     
+     <select id="selectList" resultType="lcList">
+           SELECT        l_number     as l_number,
+                         l_board      as l_board
+           FROM          lc_list
+     </select>
+     
+     <select id="Search" resultType="Board" parameterType="Board">
+     
+           SELECT           b_num       as b_num,
+                            b_title     as b_title,
+                            b_content   as b_content,
+                            b_dateTime  as b_dateTime,
+                            b_hits      as b_hits,
+                            group_id    as group_id,
+                            b_order     as b_order,
+                            b_id        as b_id,
+                            b_number    as b_number,
+                            @ROWNUM := @ROWNUM -1 AS Rownum,ta.*
+          FROM              lc_board ta,
+                           (SELECT @rownum := (SELECT COUNT(*)-#{pageNum}+1 FROM lc_board))tb
+           <choose>
+              <when test="select != null and select.equals('b_title')">
+                  WHERE b_title LIKE CONCAT('%', #{search}, '%')
+              </when>
+             
+              <when test= "select != null and select.equals('b_content')">
+                  WHERE b_content LIKE #{search}
+              </when>
+             
+              <when test= "select != null and select.equals('b_id')">
+                  WHERE b_id LIKE #{search}
+              </when>
+           </choose> 
+           LIMIT             #{pageNum},3 
+     </select>
+     
+     
+     
+     <update id= "UpdateGroup" parameterType="Board">
+            update lc_board set group_id=#{b_num} 
+            where b_num=#{b_num}
+     </update>
+     
+     
+     <update id= "UpdateOrder" parameterType="Board">
+            update lc_board set b_order=#{b_order} 
+            where b_num=#{b_num}
+            
+          <selectKey resultType= "int" keyProperty="b_order" order="BEFORE">
+            SELECT IFNULL(MAX(b_order), 0) + 1 
+            FROM lc_board
+            where group_id=#{group_id}
+          </selectKey>
+            
+     </update>
+ 
+     
+     
+     
+  
+     <insert id="createBoard" parameterType="Board" >
+
+           INSERT INTO lc_board(
+                          b_title,
+                          b_content,
+                          b_id,
+                          b_number,
+                          group_id
+                
+           )VALUES(       
+                          #{b_title},
+                          #{b_content},
+                          #{b_id},
+                          #{b_number},
+                          #{group_id}
+                         
+           ) 
+           
+           <selectKey keyProperty="b_num" resultType="Integer" order="AFTER">
+		       SELECT LAST_INSERT_ID()
+          </selectKey>
+          
+     </insert>
+     
+     <insert id="Comment" parameterType="Comment"> 
+          insert into lc_comment(c_comment, c_id, c_number) values(#{c_comment}, #{c_id}, #{c_number})
+     </insert>
+     
+     <select id="selectComment" parameterType="Comment" resultType="Comment">
+          SELECT c_num as c_num, c_comment as c_comment, c_id as c_id, c_number as c_number, c_date as c_date
+          FROM   lc_comment
+          WHERE  c_number = #{c_number}
+     </select>
+     
+     <update id="CommentEdit" parameterType="Comment">
+          update lc_comment set c_comment=#{c_comment} where c_num=#{c_num}  
+     </update>
+     
+     <delete id="CommentDelete" parameterType="Comment">
+          delete from lc_comment where c_num=#{c_num}
+     </delete>
+     
+     <update id="EditBoard" parameterType="Board">
+          update lc_board set b_title= #{b_title}, b_content=#{b_content} where b_num=#{b_num}
+     </update>
+     
+     <delete id="deleteBoard" parameterType="Board">
+          delete from lc_board where b_num=#{b_num}
+     </delete>
+     
+     
+</mapper>

@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "server.tomcat.file-encoding",
+    "type": "java.lang.String",
+    "description": "A description for 'server.tomcat.file-encoding'"
+  },
+  {
+    "name": "spring.datasource.spring.jpa.generate-ddl",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.spring.jpa.generate-ddl'"
+  },
+  {
+    "name": "spring.datasource.spring.jpa.hibernate.ddl-auto",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.spring.jpa.hibernate.ddl-auto'"
+  }
+]}
